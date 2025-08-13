@@ -1,21 +1,27 @@
-# NS-3
+````markdown
+# Simulación de Red con NS-3
 
--Daniel Ayala
+Integrantes del equipo:
+- Daniel Ayala
+- Cristian Bello
+- Samuel Chaves
+- Kevin Guevara
 
--Cristian Bello
+## 1. Descripción General
 
--Samuel Chaves
+Este proyecto implementa una topología de tres nodos utilizando NS-3.  
+El nodo `n0` envía datos a `n1` y `n2`, mientras que el nodo `n1` también envía datos al nodo `n2`.  
+Se incluyen análisis de rendimiento de red y visualización gráfica de los resultados.
 
--Kevin Guevara 
-
-## SIMULACIÓN 
-
-En la siguiente imagen se puede apreciar la union de los nodos, donde el nodo n0 le envia datos al nodo n1 y n2, y el nodo 1 tambien envia datos al n2.
-
+Topología simulada:
+````
+ 
 ![image](https://github.com/user-attachments/assets/2c6a1fc9-0de5-4105-a62f-3578a2268481)
 
-## CODIGO
-```do
+``` 
+## 2. Código de Simulación (C++ con NS-3)
+
+```cpp
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/internet-module.h"
@@ -51,7 +57,7 @@ int main(int argc, char* argv[]) {
     stack.Install(nodes);
 
     Ipv4AddressHelper address;
-    
+
     address.SetBase("10.1.1.0", "255.255.255.0");
     Ipv4InterfaceContainer interfaces01 = address.Assign(devices01);
 
@@ -62,11 +68,11 @@ int main(int argc, char* argv[]) {
     Ipv4InterfaceContainer interfaces12 = address.Assign(devices12);
 
     UdpEchoServerHelper echoServer(9);
-    
+
     ApplicationContainer serverApps1 = echoServer.Install(nodes.Get(1));
     serverApps1.Start(Seconds(1.0));
     serverApps1.Stop(Seconds(10.0));
-    
+
     ApplicationContainer serverApps2 = echoServer.Install(nodes.Get(2));
     serverApps2.Start(Seconds(1.0));
     serverApps2.Stop(Seconds(10.0));
@@ -107,119 +113,103 @@ int main(int argc, char* argv[]) {
     Simulator::Destroy();
     return 0;
 }
+````
+## 3. Análisis TCP
 
-```
+> Archivos `.pcap` disponibles en el repositorio.
 
-## ANALISIS TCP
-(Archivos pcap subidos en el github)
-```do
+```txt
 Flow ID: 1 (10.1.1.2 -> 10.1.1.1)
   Tx Packets: 100
   Rx Packets: 100
   Lost Packets: 0
   Packet Loss Ratio: 0%
-  Average Delay: 0.0066864 seconds
+  Average Delay: 0.0066864 s
   Throughput: 84.9527 kbps
+
 Flow ID: 2 (10.1.1.1 -> 10.1.1.2)
   Tx Packets: 100
   Rx Packets: 100
   Lost Packets: 0
   Packet Loss Ratio: 0%
-  Average Delay: 0.0066864 seconds
+  Average Delay: 0.0066864 s
   Throughput: 84.9527 kbps
+
 Flow ID: 3 (10.1.2.2 -> 10.1.2.1)
   Tx Packets: 100
   Rx Packets: 100
   Lost Packets: 0
   Packet Loss Ratio: 0%
-  Average Delay: 0.0066864 seconds
+  Average Delay: 0.0066864 s
   Throughput: 84.9527 kbps
+
 Flow ID: 4 (10.1.2.1 -> 10.1.2.2)
   Tx Packets: 100
   Rx Packets: 100
   Lost Packets: 0
   Packet Loss Ratio: 0%
-  Average Delay: 0.0066864 seconds
+  Average Delay: 0.0066864 s
   Throughput: 84.9527 kbps
-  ``` 
+```
 
-Los resultados muestra que todos los flujos de datos están funcionando de manera óptima en términos de entrega de paquetes y rendimiento de la red:
+Interpretación:
 
-Entrega de paquetes:
+* **Entrega de paquetes:** 100% de entrega, sin pérdidas.
+* **Rendimiento:** `84.95 kbps` en todos los flujos.
+* **Retardo promedio:** `6.69 ms`, óptimo para la mayoría de aplicaciones.
+* **Simetría:** comunicación bidireccional con rendimiento idéntico en ambas direcciones.
 
-Todos los flujos tienen 100 paquetes transmitidos (Tx) y 100 paquetes recibidos (Rx).
-No hay paquetes perdidos en ninguno de los flujos (Lost Packets = 0).
-La tasa de pérdida de paquetes (Packet Loss Ratio) es 0%, lo que indica que no hubo congestión ni problemas de transmisión.
-Rendimiento de la red:
+> Si se reduce el ancho de banda, podrían aparecer pérdidas y mayores retardos, afectando el rendimiento.
 
-El retraso promedio (Average Delay) es 0.0066864 segundos (6.69 ms), lo cual es un valor bastante bajo y adecuado para la mayoría de aplicaciones en red.
-El rendimiento (Throughput) es de 84.9527 kbps en todos los flujos, lo que sugiere que la red está proporcionando un ancho de banda uniforme.
+## 4. Visualización en Python
 
-Simetría en la comunicación:
+La gráfica muestra que, al no existir pérdida de paquetes ni variaciones de retardo, el rendimiento se mantiene estable y lineal.
 
-Hay pares de flujos bidireccionales (ejemplo: Flow ID 1 y 2, Flow ID 3 y 4), lo que indica que la comunicación entre los nodos es equilibrada.
-
-Otro forma de resultado:
-
-Si se quisiera ver otro resultado tocaria cambiar el tamaño del ancho de banda para que algunos datos tengan problemas en enviarse produciendo asi la perdida de paquetes y que el retraso cambie, generando asi que el rendimiento del envio de datos sea menor. 
-
-Conclusión:
-
-- No hay pérdidas ni problemas de transmisión (Dependiendo del ancho de banda).
-  
-- El rendimiento y el retardo son consistentes en todos los flujos
-  
-- El tráfico es simétrico y estable.
-
-##GRAFICA python
-
-Se puede ver en la grafica que al ser constante y no haber perdida de paquetes la grafica es lineal.
+**Gráfica:**
 
 ![image](https://github.com/user-attachments/assets/88c27b40-9f48-4611-87ba-8b628dba94be)
 
--Codigo
- ```do
+**Código de visualización:**
+
+```python
 import matplotlib.pyplot as plt
-import numpy as np
 
-# Datos que proporcionaste
+# Datos
 flows = ['Flow 1', 'Flow 2', 'Flow 3', 'Flow 4']
-throughput = [84.9527, 84.9527, 84.9527, 84.9527]  # kbps
-delay = [0.0066864, 0.0066864, 0.0066864, 0.0066864]  # en segundos
-packet_loss = [0, 0, 0, 0]  # %
+throughput = [84.9527] * 4  # kbps
+delay = [0.0066864] * 4     # segundos
+packet_loss = [0] * 4       # %
 
-# Crear la figura y los ejes
 fig, ax1 = plt.subplots(figsize=(10, 6))
 
-# Graficar el Throughput
-color = 'tab:blue'
+# Throughput
 ax1.set_xlabel('Flujos')
-ax1.set_ylabel('Throughput (kbps)', color=color)
-ax1.bar(flows, throughput, color=color, alpha=0.6, label="Throughput (kbps)")
-ax1.tick_params(axis='y', labelcolor=color)
+ax1.set_ylabel('Throughput (kbps)', color='tab:blue')
+ax1.bar(flows, throughput, color='tab:blue', alpha=0.6, label="Throughput (kbps)")
+ax1.tick_params(axis='y', labelcolor='tab:blue')
 
-# Crear un segundo eje para el Delay y el Packet Loss
+# Delay y Packet Loss
 ax2 = ax1.twinx()
-color = 'tab:red'
-ax2.set_ylabel('Delay (s) / Packet Loss (%)', color=color)
+ax2.set_ylabel('Delay (s) / Packet Loss (%)', color='tab:red')
 ax2.plot(flows, delay, color='tab:red', marker='o', label="Delay (s)")
 ax2.plot(flows, packet_loss, color='tab:green', marker='s', label="Packet Loss (%)")
-ax2.tick_params(axis='y', labelcolor=color)
+ax2.tick_params(axis='y', labelcolor='tab:red')
 
-# Añadir título y leyenda
-fig.tight_layout()  # Ajusta el diseño
-plt.title('Gráfica de Desempeño de Flujos de Red')
-
-# Mostrar leyendas
+plt.title('Desempeño de Flujos de Red')
 ax1.legend(loc='upper left')
 ax2.legend(loc='upper right')
 
-# Mostrar la gráfica
+plt.tight_layout()
 plt.show()
 ```
--Grafica con "problemas": Esto refleja una red con congestionamiento, variabilidad en el rendimiento y pérdida de paquetes en ciertos flujos.
+
+**Ejemplo con congestión:**
 
 ![image](https://github.com/user-attachments/assets/d10a854b-9a3d-4c44-8af0-ebb6754426bc)
 
+## 5. Conclusiones
 
-
+* Sin pérdida de paquetes bajo condiciones normales de ancho de banda.
+* Rendimiento constante y simétrico en todos los flujos.
+* Retardo bajo y estable.
+* La congestión en la red puede modificar drásticamente el rendimiento y la entrega de datos.
